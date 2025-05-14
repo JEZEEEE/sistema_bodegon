@@ -1,0 +1,19 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+.venv/
+env/
+.env
+
+# SQLite database file (opcional, si no quieres versionar el archivo .db en sí, solo el script SQL para crearlo)
+*.sqlite
+*.sqlite3
+
+# IDE / Editor specific files
+.vscode/
+.idea/
+*.DS_Store
