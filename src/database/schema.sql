@@ -1,88 +1,105 @@
--- Habilitar el uso de claves foráneas (recomendado ejecutar al inicio de la conexión)
+-- Habilitar el uso de claves foráneas
 PRAGMA foreign_keys = ON;
 
 -- Tabla: Deudores
 -- Descripción: Almacena información de las personas que tienen deudas o realizan abonos.
-CREATE TABLE Deudores (
-    deu_ide INTEGER PRIMARY KEY AUTOINCREMENT, -- Identificador único del deudor (Clave Primaria)
-    deu_nom TEXT NOT NULL,                     -- Nombre completo del deudor
-    deu_ced TEXT UNIQUE,                       -- Cédula de identidad del deudor (debe ser única si se usa)
-    deu_tel TEXT,                              -- Número de teléfono de contacto del deudor
-    deu_dir TEXT,                              -- Dirección de habitación del deudor
-    deu_fec TEXT NOT NULL,                     -- Fecha de registro del deudor en el sistema (Formato ISO8601 YYYY-MM-DD HH:MM:SS)
-    deu_est CHAR(1) NOT NULL DEFAULT 'A'       -- Estatus del deudor (A: Activo, I: Inactivo). CHECK constraint abajo.
-    CHECK (deu_est IN ('A', 'I'))
+CREATE TABLE IF NOT EXISTS Deudores (
+    ide_deu INTEGER PRIMARY KEY AUTOINCREMENT, -- Conceptual: id_deudor. Identificador único del deudor
+    nom_deu TEXT NOT NULL,                     -- Conceptual: nombre_completo. Nombre completo del deudor
+    ced_deu TEXT UNIQUE,                       -- Conceptual: cedula_identidad. Cédula de identidad del deudor
+    tel_deu TEXT,                              -- Conceptual: telefono_contacto. Número de teléfono de contacto
+    dir_deu TEXT,                              -- Conceptual: direccion_habitacion. Dirección de habitación
+    fec_reg_deu TEXT NOT NULL,                 -- Conceptual: fecha_registro. Fecha de registro (Formato ISO8601)
+    est_deu CHAR(1) NOT NULL DEFAULT 'A'       -- Conceptual: estatus_deudor. Estatus (A: Activo, I: Inactivo)
+    CHECK (est_deu IN ('A', 'I'))
 );
 
 -- Tabla: Monedas
 -- Descripción: Define las diferentes monedas que el sistema aceptará para las transacciones.
-CREATE TABLE Monedas (
-    mon_ide INTEGER PRIMARY KEY AUTOINCREMENT, -- Identificador único de la moneda (Clave Primaria)
-    mon_cod TEXT UNIQUE NOT NULL,              -- Código de la moneda (ej: 'USD', 'COP', 'VES')
-    mon_nom TEXT NOT NULL,                     -- Nombre descriptivo de la moneda (ej: 'Dólar Americano')
-    mon_sim TEXT,                              -- Símbolo de la moneda (ej: '$', 'Bs.')
-    mon_est CHAR(1) NOT NULL DEFAULT 'A'       -- Estatus de la moneda (A: Activa, I: Inactiva). CHECK constraint abajo.
-    CHECK (mon_est IN ('A', 'I'))
+CREATE TABLE IF NOT EXISTS Monedas (
+    ide_mon INTEGER PRIMARY KEY AUTOINCREMENT, -- Conceptual: id_moneda. Identificador único de la moneda
+    cod_mon TEXT UNIQUE NOT NULL,              -- Conceptual: codigo_moneda. Código (ej: 'USD', 'COP', 'VES')
+    nom_mon TEXT NOT NULL,                     -- Conceptual: nombre_moneda. Nombre descriptivo de la moneda
+    sim_mon TEXT,                              -- Conceptual: simbolo_moneda. Símbolo (ej: '$', 'Bs.')
+    est_mon CHAR(1) NOT NULL DEFAULT 'A'       -- Conceptual: estatus_moneda. Estatus (A: Activa, I: Inactiva)
+    CHECK (est_mon IN ('A', 'I'))
 );
 
 -- Tabla: TasasCambio
--- Descripción: Registra las tasas de cambio diarias entre pares de monedas, ingresadas manualmente.
-CREATE TABLE TasasCambio (
-    tas_ide INTEGER PRIMARY KEY AUTOINCREMENT, -- Identificador único de la tasa de cambio (Clave Primaria)
-    tas_mon_ori INTEGER NOT NULL,              -- ID de la moneda origen (FK a Monedas.mon_ide)
-    tas_mon_des INTEGER NOT NULL,              -- ID de la moneda destino (FK a Monedas.mon_ide), usualmente la moneda local de referencia
-    tas_val REAL NOT NULL,                     -- Valor de la tasa (ej: cuántas 'mon_des' equivalen a una 'mon_ori')
-    tas_fec TEXT NOT NULL,                     -- Fecha de vigencia para esta tasa (Formato ISO8601 YYYY-MM-DD)
-    tas_est CHAR(1) NOT NULL DEFAULT 'A'       -- Estatus de la tasa (A: Aplicada/Válida, X: Anulada/Corregida). CHECK constraint abajo.
-    CHECK (tas_est IN ('A', 'X')),
-    FOREIGN KEY (tas_mon_ori) REFERENCES Monedas(mon_ide),
-    FOREIGN KEY (tas_mon_des) REFERENCES Monedas(mon_ide),
-    UNIQUE (tas_mon_ori, tas_mon_des, tas_fec) -- Asegura que solo hay una tasa por par de monedas por día (válida)
+-- Descripción: Registra las tasas de cambio diarias entre pares de monedas.
+CREATE TABLE IF NOT EXISTS TasasCambio (
+    ide_tas INTEGER PRIMARY KEY AUTOINCREMENT, -- Conceptual: id_tasa. Identificador único de la tasa
+    mon_ori_tas INTEGER NOT NULL,              -- Conceptual: moneda_origen_id. FK a Monedas(ide_mon)
+    mon_des_tas INTEGER NOT NULL,              -- Conceptual: moneda_destino_id. FK a Monedas(ide_mon)
+    val_tas REAL NOT NULL,                     -- Conceptual: valor_tasa. Valor de la tasa
+    fec_tas TEXT NOT NULL,                     -- Conceptual: fecha_tasa. Fecha de vigencia (Formato ISO8601)
+    est_tas CHAR(1) NOT NULL DEFAULT 'A'       -- Conceptual: estatus_tasa. Estatus (A: Aplicada, X: Anulada)
+    CHECK (est_tas IN ('A', 'X')),
+    FOREIGN KEY (mon_ori_tas) REFERENCES Monedas(ide_mon),
+    FOREIGN KEY (mon_des_tas) REFERENCES Monedas(ide_mon),
+    UNIQUE (mon_ori_tas, mon_des_tas, fec_tas) -- Unicidad por par de monedas y fecha
+);
+
+-- Tabla: MetodosPago
+-- Descripción: Define los diferentes métodos de pago.
+CREATE TABLE IF NOT EXISTS MetodosPago (
+    ide_met INTEGER PRIMARY KEY AUTOINCREMENT, -- Conceptual: id_metodo. Identificador único del método de pago
+    nom_met TEXT UNIQUE NOT NULL,              -- Conceptual: nombre_metodo. Nombre del método de pago
+    des_met TEXT,                              -- Conceptual: descripcion_metodo. Descripción adicional
+    est_met CHAR(1) NOT NULL DEFAULT 'A'       -- Conceptual: estatus_metodo. Estatus (A: Activo, I: Inactivo)
+    CHECK (est_met IN ('A', 'I'))
 );
 
 -- Tabla: Transacciones
--- Descripción: Almacena cada operación de deuda o abono realizada por un deudor.
-CREATE TABLE Transacciones (
-    tra_ide INTEGER PRIMARY KEY AUTOINCREMENT, -- Identificador único de la transacción (Clave Primaria)
-    tra_deu_ide INTEGER NOT NULL,              -- ID del deudor asociado a la transacción (FK a Deudores.deu_ide)
-    tra_mon_ide INTEGER NOT NULL,              -- ID de la moneda en que se realizó la transacción (FK a Monedas.mon_ide)
-    tra_tip TEXT NOT NULL,                     -- Tipo de transacción ('DEUDA' para un nuevo fiao, 'ABONO' para un pago) CHECK (tra_tip IN ('DEUDA', 'ABONO'))
-    tra_mto REAL NOT NULL,                     -- Monto de la transacción en la moneda especificada en 'tra_mon_ide'
-    tra_fec_hra TEXT NOT NULL,                 -- Fecha y hora exactas de la transacción (Formato ISO8601 YYYY-MM-DD HH:MM:SS)
-    tra_des TEXT,                              -- Descripción adicional o nota sobre la transacción (opcional)
-    tra_usu_ide INTEGER,                       -- ID del usuario que registró la transacción (FK a Usuarios.usu_ide, opcional si no hay login detallado)
-    tra_est CHAR(1) NOT NULL DEFAULT 'V'       -- Estatus de la transacción (V: Válida, N: Anulada). CHECK constraint abajo.
-    CHECK (tra_est IN ('V', 'N')),
-    FOREIGN KEY (tra_deu_ide) REFERENCES Deudores(deu_ide),
-    FOREIGN KEY (tra_mon_ide) REFERENCES Monedas(mon_ide),
-    FOREIGN KEY (tra_usu_ide) REFERENCES Usuarios(usu_ide)
+-- Descripción: Almacena cada operación de deuda o abono.
+CREATE TABLE IF NOT EXISTS Transacciones (
+    ide_tra INTEGER PRIMARY KEY AUTOINCREMENT, -- Conceptual: id_transaccion. Identificador único
+    deu_ide_tra INTEGER NOT NULL,              -- Conceptual: deudor_id. FK a Deudores(ide_deu)
+    mon_ide_tra INTEGER NOT NULL,              -- Conceptual: moneda_id. FK a Monedas(ide_mon)
+    tip_tra TEXT NOT NULL CHECK (tip_tra IN ('DEUDA', 'ABONO')), -- Conceptual: tipo_transaccion. ('DEUDA' o 'ABONO')
+    mto_tra REAL NOT NULL,                     -- Conceptual: monto_transaccion. Monto en su moneda
+    fec_hra_tra TEXT NOT NULL,                 -- Conceptual: fecha_hora_transaccion. Fecha y hora (Formato ISO8601)
+    des_tra TEXT,                              -- Conceptual: descripcion_transaccion. Descripción adicional
+    usu_ide_tra INTEGER,                       -- Conceptual: usuario_id. FK a Usuarios(ide_usu)
+    met_ide_tra INTEGER,                       -- Conceptual: metodo_pago_id. FK a MetodosPago(ide_met), si es 'ABONO'
+    est_tra CHAR(1) NOT NULL DEFAULT 'V'       -- Conceptual: estatus_transaccion. Estatus (V: Válida, N: Anulada)
+    CHECK (est_tra IN ('V', 'N')),
+    FOREIGN KEY (deu_ide_tra) REFERENCES Deudores(ide_deu),
+    FOREIGN KEY (mon_ide_tra) REFERENCES Monedas(ide_mon),
+    FOREIGN KEY (usu_ide_tra) REFERENCES Usuarios(ide_usu),
+    FOREIGN KEY (met_ide_tra) REFERENCES MetodosPago(ide_met)
 );
 
 -- Tabla: Usuarios
--- Descripción: Gestiona los usuarios del sistema (inicialmente, el propietario).
-CREATE TABLE Usuarios (
-    usu_ide INTEGER PRIMARY KEY AUTOINCREMENT, -- Identificador único del usuario (Clave Primaria)
-    usu_nom TEXT UNIQUE NOT NULL,              -- Nombre de usuario para login (debe ser único)
-    usu_cla TEXT NOT NULL,                     -- Contraseña del usuario (se debe almacenar un HASH, no la clave en texto plano)
-    usu_rol TEXT NOT NULL,                     -- Rol del usuario (ej: 'propietario', 'administrador')
-    usu_est CHAR(1) NOT NULL DEFAULT 'A'       -- Estatus del usuario (A: Activo, I: Inactivo). CHECK constraint abajo.
-    CHECK (usu_est IN ('A', 'I'))
+-- Descripción: Gestiona los usuarios del sistema.
+CREATE TABLE IF NOT EXISTS Usuarios (
+    ide_usu INTEGER PRIMARY KEY AUTOINCREMENT, -- Conceptual: id_usuario. Identificador único del usuario
+    nom_usu TEXT UNIQUE NOT NULL,              -- Conceptual: nombre_usuario. Nombre de usuario para login
+    cla_usu TEXT NOT NULL,                     -- Conceptual: clave_usuario. Contraseña HASHED
+    rol_usu TEXT NOT NULL,                     -- Conceptual: rol_usuario. Rol del usuario
+    est_usu CHAR(1) NOT NULL DEFAULT 'A'       -- Conceptual: estatus_usuario. Estatus (A: Activo, I: Inactivo)
+    CHECK (est_usu IN ('A', 'I'))
 );
 
 -- Tabla: Configuracion
--- Descripción: Almacena parámetros y configuraciones generales del sistema.
-CREATE TABLE Configuracion (
-    con_cla TEXT PRIMARY KEY,                  -- Clave única para el parámetro de configuración (ej: 'moneda_referencia_id')
-    con_val TEXT,                              -- Valor asociado a la clave de configuración
-    con_est CHAR(1) NOT NULL DEFAULT 'A'       -- Estatus del parámetro (A: Activo, I: Inactivo). CHECK constraint abajo.
-    CHECK (con_est IN ('A', 'I'))
+-- Descripción: Almacena parámetros generales del sistema.
+CREATE TABLE IF NOT EXISTS Configuracion (
+    cla_con TEXT PRIMARY KEY,                  -- Conceptual: clave_configuracion. Clave única del parámetro
+    val_con TEXT,                              -- Conceptual: valor_configuracion. Valor del parámetro
+    est_con CHAR(1) NOT NULL DEFAULT 'A'       -- Conceptual: estatus_configuracion. Estatus (A: Activo, I: Inactivo)
+    CHECK (est_con IN ('A', 'I'))
 );
 
--- (Los ejemplos de INSERT se mantienen igual, pero ahora las tablas tienen la columna de estatus con su valor por defecto 'A' o 'V')
-INSERT INTO Monedas (mon_cod, mon_nom, mon_sim) VALUES
-('VES', 'Bolívar Soberano', 'BsS'),
-('COP', 'Peso Colombiano', 'COP'),
-('USD', 'Dólar Americano', '$');
+-- Inserción de datos semilla
+INSERT OR IGNORE INTO Monedas (cod_mon, nom_mon, sim_mon, est_mon) VALUES
+('VES', 'Bolívar Soberano', 'BsS', 'A'),
+('COP', 'Peso Colombiano', 'COP', 'A'),
+('USD', 'Dólar Americano', '$', 'A');
 
-INSERT INTO Configuracion (con_cla, con_val) VALUES
-('moneda_referencia_id', (SELECT mon_ide FROM Monedas WHERE mon_cod = 'VES'));
+INSERT OR IGNORE INTO MetodosPago (nom_met, des_met, est_met) VALUES
+('Efectivo', 'Pago realizado en dinero físico', 'A'),
+('Pago Móvil', 'Pago realizado mediante plataforma de pago móvil interbancario', 'A'),
+('Transferencia', 'Transferencia bancaria directa', 'A');
+
+INSERT OR IGNORE INTO Configuracion (cla_con, val_con, est_con) VALUES
+('moneda_referencia_id', (SELECT ide_mon FROM Monedas WHERE cod_mon = 'VES'), 'A');
