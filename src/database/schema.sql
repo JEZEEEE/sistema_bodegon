@@ -6,9 +6,9 @@ PRAGMA foreign_keys = ON;
 CREATE TABLE IF NOT EXISTS Empresas (
     ide_emp INTEGER PRIMARY KEY AUTOINCREMENT, -- Conceptual: id_empresa. Identificador único de la empresa
     nom_emp TEXT UNIQUE NOT NULL,              -- Conceptual: nombre_empresa. Nombre de la empresa
-    rif_emp TEXT UNIQUE,                       -- Conceptual: rif_empresa. RIF de la empresa (opcional)
-    dir_emp TEXT,                              -- Conceptual: direccion_empresa. Dirección de la empresa (opcional)
-    tel_emp TEXT,                              -- Conceptual: telefono_empresa. Teléfono de la empresa (opcional)
+    rif_emp TEXT UNIQUE NOT NULL,                       -- Conceptual: rif_empresa. RIF de la empresa (opcional)
+    dir_emp TEXT NULL,                              -- Conceptual: direccion_empresa. Dirección de la empresa (opcional)
+    tel_emp TEXT NULL,                              -- Conceptual: telefono_empresa. Teléfono de la empresa (opcional)
     est_emp CHAR(1) NOT NULL DEFAULT 'A'       -- Conceptual: estatus_empresa. Estatus (A: Activa, I: Inactiva)
     CHECK (est_emp IN ('A', 'I'))
 );
@@ -18,9 +18,9 @@ CREATE TABLE IF NOT EXISTS Empresas (
 CREATE TABLE IF NOT EXISTS Deudores (
     ide_deu INTEGER PRIMARY KEY AUTOINCREMENT, -- Conceptual: id_deudor. Identificador único del deudor
     nom_deu TEXT NOT NULL,                     -- Conceptual: nombre_completo. Nombre completo del deudor
-    ced_deu TEXT UNIQUE,                       -- Conceptual: cedula_identidad. Cédula de identidad del deudor
-    tel_deu TEXT,                              -- Conceptual: telefono_contacto. Número de teléfono de contacto
-    dir_deu TEXT,                              -- Conceptual: direccion_habitacion. Dirección de habitación
+    ced_deu TEXT UNIQUE NOT NULL,                       -- Conceptual: cedula_identidad. Cédula de identidad del deudor
+    tel_deu TEXT NOT NULL,                              -- Conceptual: telefono_contacto. Número de teléfono de contacto
+    dir_deu TEXT NULL,                              -- Conceptual: direccion_habitacion. Dirección de habitación
     fec_reg_deu TEXT NOT NULL,                 -- Conceptual: fecha_registro. Fecha de registro (Formato ISO8601)
     emp_ide_deu INTEGER,                       -- Conceptual: empresa_id. FK a Empresas(ide_emp) (Opcional)
     est_deu CHAR(1) NOT NULL DEFAULT 'A'       -- Conceptual: estatus_deudor. Estatus (A: Activo, I: Inactivo)
