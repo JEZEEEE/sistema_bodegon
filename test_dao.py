@@ -99,4 +99,4 @@ if __name__ == '__main__':
         print("No se pudo preparar el entorno de pruebas. Revisa los mensajes de error.")
         
         
-        #Debes de agregar en la base de datos que los campos de cedula, numero de telefono y direccion del deudor sean obligatorios para que el caso 2 con campos obligatorios se cumpla, realiza todo esos cambios y dame los archivos actualizados que tengan esos cambios
+      
